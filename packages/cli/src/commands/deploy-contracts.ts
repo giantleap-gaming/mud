@@ -24,6 +24,8 @@ export const builder: CommandBuilder<Options, Options> = (yargs) =>
     dev: { type: "boolean", desc: "Automatically use funded dev private key for local development" },
     openUrl: { type: "string", desc: "Opens a browser at the provided url with the worldAddress url param prefilled" },
     gasPrice: { type: "number", desc: "Gas price to set for deploy transactions" },
+    legacy: { type: "boolean", desc: "Deploys on chains with no support for EIP 1559 if set to true." },
+    optionalArgs: { type: "string", desc: "Accepts one additional argument" },
   });
 
 export const handler = async (args: Arguments<Options>): Promise<void> => {
@@ -68,7 +70,7 @@ export const handler = async (args: Arguments<Options>): Promise<void> => {
 
   // Set up watcher for system files to redeploy on change
   if (args.watch) {
-    const { config, rpc, gasPrice } = args;
+    const { config, rpc, gasPrice, legacy, optionalArgs } = args;
     const srcDir = await getSrcDirectory();
 
     hsr(srcDir, async (systems: string[]) => {
@@ -81,6 +83,8 @@ export const handler = async (args: Arguments<Options>): Promise<void> => {
           systems,
           gasPrice,
           reuseComponents: true,
+          legacy,
+          optionalArgs,
         });
       } catch (e: any) {
         if (!e.stderr) {

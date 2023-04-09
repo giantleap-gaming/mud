@@ -20,7 +20,9 @@ export async function deploy(
   rpc = "http://localhost:8545",
   worldAddress?: string,
   reuseComponents?: boolean,
-  gasPrice?: number
+  gasPrice?: number,
+  legacy?: boolean,
+  optionalArgs?: string
 ) {
   const address = deployerPrivateKey ? new Wallet(deployerPrivateKey).address : constants.AddressZero;
 
@@ -52,6 +54,8 @@ export async function deploy(
       "--fork-url",
       rpc,
       ...(gasPrice != null ? ["--with-gas-price", String(Math.round(gasPrice))] : []),
+      ...(legacy === true ? ["--legacy"] : []),
+      ...(!optionalArgs ? [] : [`--${optionalArgs}`]),
     ],
     { stdio: ["inherit", "pipe", "pipe"] }
   );
@@ -76,6 +80,8 @@ export type DeployOptions = {
   reuseComponents?: boolean;
   clear?: boolean;
   gasPrice?: number;
+  legacy?: boolean;
+  optionalArgs?: string;
 };
 
 export async function generateAndDeploy(args: DeployOptions) {
@@ -96,7 +102,9 @@ export async function generateAndDeploy(args: DeployOptions) {
       args.rpc,
       args.worldAddress,
       Boolean(args.reuseComponents),
-      args.gasPrice
+      args.gasPrice,
+      args.legacy,
+      args.optionalArgs
     );
     deployedWorldAddress = result.deployedWorldAddress;
     initialBlockNumber = result.initialBlockNumber;
